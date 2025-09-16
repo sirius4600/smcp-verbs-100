@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SMCP Verbs 100">
+    <title>SMCP Verbs 100</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-card: rgba(40, 40, 40, 0.95);
+            --bg-white: #2d2d2d;
+            --bg-secondary: #374151;
+            --bg-stat: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #374151;
+            --border-stat: #374151;
+            --shadow-card: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-white: white;
+            --bg-secondary: #f3f4f6;
+            --bg-stat: #f8fafc;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --border-stat: #e2e8f0;
+            --shadow-card: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: max(env(safe-area-inset-top), 20px) max(env(safe-area-inset-right), 20px) max(env(safe-area-inset-bottom), 20px) max(env(safe-area-inset-left), 20px);
+            transition: background 0.3s ease;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .app-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow-card);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: calc(100vh - 40px);
+            max-height: calc(-webkit-fill-available - 40px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-10px, -10px) rotate(5deg); }
+        }
+
+        .header {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .theme-toggle:hover, .theme-toggle:active {
+            transform: scale(1.1);
+            background: var(--bg-white);
+        }
+
+        .app-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .app-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            background: var(--bg-secondary);
+            border-radius: 25px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 25px;
+            transition: width 0.5s ease;
+        }
+
+        .question-counter {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 30px 20px;
+            margin: 15px 0;
+            box-shadow: 0 10px 30px var(--shadow-card);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .card:active {
+            transform: translateY(-2px) scale(0.98);
+            box-shadow: 0 8px 20px var(--shadow-hover);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px var(--shadow-hover);
+        }
+
+        .question {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .rank {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .answer {
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            min-width: 44px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .completion-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .completion-title {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .completion-message {
+            color: var(--text-secondary);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            background: var(--bg-stat);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-stat);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .wave {
+            animation: wave 2s infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px;
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .app-title {
+                font-size: 2em;
+            }
+
+            .app-subtitle {
+                font-size: 1em;
+            }
+            
+            .question {
+                font-size: 1.4em;
+                line-height: 1.4;
+            }
+            
+            .answer {
+                font-size: 2.5em;
+                line-height: 1.2;
+            }
+
+            .card {
+                padding: 25px 15px;
+                margin: 10px 0;
+                min-height: 160px;
+            }
+
+            .rank {
+                top: 10px;
+                right: 15px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 14px 28px;
+                font-size: 1em;
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .controls {
+                margin-top: 20px;
+            }
+
+            .theme-toggle {
+                width: 45px;
+                height: 45px;
+                top: 5px;
+                right: 5px;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .completion-title {
+                font-size: 1.8em;
+            }
+
+            .completion-message {
+                font-size: 1.1em;
+            }
+
+            .stats {
+                gap: 15px;
+                margin: 20px 0;
+            }
+
+            .stat-item {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 1.8em;
+            }
+        }
+
+        /* 아이폰 SE 및 소형 화면 최적화 */
+        @media (max-width: 375px) {
+            .app-container {
+                padding: 12px;
+                margin: 8px;
+            }
+
+            .app-title {
+                font-size: 1.8em;
+            }
+
+            .question {
+                font-size: 1.2em;
+            }
+
+            .answer {
+                font-size: 2.2em;
+            }
+
+            .card {
+                padding: 20px 12px;
+                min-height: 140px;
+            }
+
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* 가로 모드 최적화 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .app-container {
+                max-height: calc(100vh - 20px);
+                padding: 10px;
+            }
+
+            .header {
+                margin-bottom: 15px;
+            }
+
+            .card {
+                min-height: 120px;
+                padding: 20px 15px;
+                margin: 8px 0;
+            }
+
+            .answer {
+                font-size: 2em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .controls {
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="learningScreen">
+            <div class="header">
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                    ☀️
+                </button>
+                <h1 class="app-title">SMCP Verbs 100</h1>
+                <p class="app-subtitle">표준해사통신용어 핵심 동사 100개</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="question-counter" id="questionCounter"></div>
+            </div>
+
+            <div class="card" id="questionCard" onclick="handleCardClick()">
+                <div class="rank" id="rank"></div>
+                <div class="question" id="question"></div>
+                <div id="answerSection" style="display: none;">
+                    <div class="answer" id="answer"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">
+                    ← 이전
+                </button>
+            </div>
+        </div>
+
+        <div id="completionScreen" class="completion-screen">
+            <div class="completion-icon wave">🎉</div>
+            <h2 class="completion-title">수고하셨습니다!</h2>
+            <p class="completion-message">표준해사통신용어 핵심 동사 100개 학습을 완료하셨습니다!</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">100</div>
+                    <div class="stat-label">학습한 단어</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="studyTime">0분</div>
+                    <div class="stat-label">학습 시간</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartLearning()">
+                    🔄 처음으로 돌아가기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const verbs = [
+            {rank: 1, korean: "보관하다, 잡다", english: "hold"},
+            {rank: 2, korean: "위치하다", english: "stand"},
+            {rank: 3, korean: "~을 필요로 하다, ~을 요구하다", english: "require"},
+            {rank: 4, korean: "통제하다, 관리하다", english: "control"},
+            {rank: 5, korean: "점검하다", english: "check"},
+            {rank: 6, korean: "구조하다", english: "rescue"},
+            {rank: 7, korean: "찾다, 수색하다", english: "search"},
+            {rank: 8, korean: "실다, 적재하다", english: "load"},
+            {rank: 9, korean: "가지다, 받다", english: "take"},
+            {rank: 10, korean: "중지하다", english: "stop"},
+            {rank: 11, korean: "부르다, 호출하다", english: "call"},
+            {rank: 12, korean: "침수하는", english: "flood"},
+            {rank: 13, korean: "입항하다, 들어가다", english: "enter"},
+            {rank: 14, korean: "(배)에 타다", english: "board"},
+            {rank: 15, korean: "예상하다, 기대하다", english: "expect"},
+            {rank: 16, korean: "뒤따르다", english: "follow"},
+            {rank: 17, korean: "유지하다, 계속하다", english: "keep"},
+            {rank: 18, korean: "바꾸다", english: "change"},
+            {rank: 19, korean: "상처를 입히다", english: "injure"},
+            {rank: 20, korean: "~에게 알리다, 통지하다", english: "inform"},
+            {rank: 21, korean: "(밧줄, 사슬로) 끌다", english: "tow"},
+            {rank: 22, korean: "~으로 나아가다, 향하다", english: "proceed"},
+            {rank: 23, korean: "~를 엎지르다", english: "spill"},
+            {rank: 24, korean: "늘리다, 증대하다", english: "increase"},
+            {rank: 25, korean: "하게 하다, 하도록 두다", english: "let"},
+            {rank: 26, korean: "놓치다", english: "miss"},
+            {rank: 27, korean: "시작하다", english: "start"},
+            {rank: 28, korean: "감소하다, 줄다", english: "decrease"},
+            {rank: 29, korean: "나타내다, 가리키다", english: "indicate"},
+            {rank: 30, korean: "하역하다", english: "discharge"},
+            {rank: 31, korean: "(~의 위치를) 알아내다, 찾아내다", english: "locate"},
+            {rank: 32, korean: "경보를 발하다, 알리다", english: "alert"},
+            {rank: 33, korean: "공급하다, 제공하다", english: "provide"},
+            {rank: 34, korean: "떠나다, 그만두다", english: "leave"},
+            {rank: 35, korean: "(해면이나 암초에) 부딪치다", english: "ground"},
+            {rank: 36, korean: "~을 받다, 수령(수취)하다", english: "receive"},
+            {rank: 37, korean: "~를 줄이다, 낮추다", english: "reduce"},
+            {rank: 38, korean: "~을 덮다", english: "cover"},
+            {rank: 39, korean: "조종하다", english: "steer"},
+            {rank: 40, korean: "지나가다, 통과하다", english: "pass"},
+            {rank: 41, korean: "탈출하다", english: "escape"},
+            {rank: 42, korean: "대답하다, 응하다", english: "answer"},
+            {rank: 43, korean: "들어올리다", english: "heave"},
+            {rank: 44, korean: "(새로 만든 배)를 진수시킨다", english: "launch"},
+            {rank: 45, korean: "~을 보내다, 발신하다", english: "transmit"},
+            {rank: 46, korean: "고르다, 뽑다", english: "pick"},
+            {rank: 47, korean: "보내다, 발신하다", english: "send"},
+            {rank: 48, korean: "승선하다", english: "embark"},
+            {rank: 49, korean: "작동하다, 움직이다", english: "operate"},
+            {rank: 50, korean: "~을 결합시키다, 붙이다", english: "connect"},
+            {rank: 51, korean: "~을 끝내다", english: "finish"},
+            {rank: 52, korean: "~을 놓다, 두다", english: "put"},
+            {rank: 53, korean: "~을 반복하다, 되풀이하다", english: "repeat"},
+            {rank: 54, korean: "~을 준비하다", english: "prepare"},
+            {rank: 55, korean: "넘겨주다", english: "hand"},
+            {rank: 56, korean: "들어올리다", english: "lift"},
+            {rank: 57, korean: "~를 지휘하다", english: "command"},
+            {rank: 58, korean: "~을 돕다, 원조하다", english: "assist"},
+            {rank: 59, korean: "계속 ~인 채로 남아있다", english: "remain"},
+            {rank: 60, korean: "기다리다, 대기하다", english: "wait"},
+            {rank: 61, korean: "변경하다, 바꾸다", english: "alter"},
+            {rank: 62, korean: "설치하다", english: "rig"},
+            {rank: 63, korean: "수송하다, 운반하다", english: "carry"},
+            {rank: 64, korean: "움직이다, 이동하다", english: "move"},
+            {rank: 65, korean: "제한하다, 금지하다", english: "restrict"},
+            {rank: 66, korean: "~처럼 들리다, ~인 것 같다", english: "sound"},
+            {rank: 67, korean: "~를 추월하다, 앞지르다", english: "overtake"},
+            {rank: 68, korean: "~을 대신하다", english: "replace"},
+            {rank: 69, korean: "~을 만나다, 조우하다", english: "meet"},
+            {rank: 70, korean: "~을 얻다, 입수하다", english: "get"},
+            {rank: 71, korean: "~을 지속하다, 유지하다", english: "maintain"},
+            {rank: 72, korean: "~을 필요로 하다", english: "need"},
+            {rank: 73, korean: "돌다, 선회하다", english: "turn"},
+            {rank: 74, korean: "인정하다", english: "acknowledge"},
+            {rank: 75, korean: "피하다, 회피하다", english: "avoid"},
+            {rank: 76, korean: "호송하다", english: "escort"},
+            {rank: 77, korean: "회복하다, 되찾다", english: "recover"},
+            {rank: 78, korean: "(밧줄이나 장비를 이용하여) 들어올리다", english: "hoist"},
+            {rank: 79, korean: "~을 개선하다", english: "improve"},
+            {rank: 80, korean: "가득 채우다", english: "fill"},
+            {rank: 81, korean: "대피하다", english: "evacuate"},
+            {rank: 82, korean: "붙이다, 고정시키다", english: "fix"},
+            {rank: 83, korean: "접근하다, 다가가다", english: "approach"},
+            {rank: 84, korean: "(불)을 끄다", english: "extinguish"},
+            {rank: 85, korean: "교육하다, 훈련하다", english: "train"},
+            {rank: 86, korean: "가르치다, 교육하다, 지시하다", english: "instruct"},
+            {rank: 87, korean: "수립하다, 설립하다", english: "establish"},
+            {rank: 88, korean: "이끌다, 인도하다", english: "lead"},
+            {rank: 89, korean: "확인하다", english: "confirm"},
+            {rank: 90, korean: "할 수 없게 하다, 손상시키다", english: "disable"},
+            {rank: 91, korean: "(짐)을 넣다, 적재하다", english: "stow"},
+            {rank: 92, korean: "개정하다", english: "revise"},
+            {rank: 93, korean: "금지하다", english: "prohibit"},
+            {rank: 94, korean: "깨뜨리다, 부수다", english: "break"},
+            {rank: 95, korean: "낮추다", english: "lower"},
+            {rank: 96, korean: "의미하다", english: "mean"},
+            {rank: 97, korean: "하선하다", english: "disembark"},
+            {rank: 98, korean: "행하다, 처리하다", english: "conduct"},
+            {rank: 99, korean: "(짐을)내리다", english: "unload"},
+            {rank: 100, korean: "묻다, 질문하다 / 부탁하다, 요구하다", english: "ask"}
+        ];
+
+        let currentIndex = 0;
+        let showingAnswer = false;
+        let startTime = Date.now();
+
+        // 나이트모드를 기본으로 설정하고 초기화
+        function initTheme() {
+            const savedTheme = localStorage.getItem('smcp-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '🌙';
+            } else {
+                // 다크모드가 기본이므로 특별한 설정 없이 태양 아이콘만 표시
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+
+        // 테마 토글 함수
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (currentTheme === 'light') {
+                // 라이트모드에서 다크모드로
+                document.documentElement.removeAttribute('data-theme');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('smcp-theme', 'dark');
+            } else {
+                // 다크모드에서 라이트모드로
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('smcp-theme', 'light');
+            }
+        }
+
+        function updateUI() {
+            const verb = verbs[currentIndex];
+            document.getElementById('rank').textContent = `#${verb.rank}`;
+            document.getElementById('question').textContent = verb.korean;
+            document.getElementById('answer').textContent = verb.english;
+            document.getElementById('questionCounter').textContent = `${currentIndex + 1} / 100`;
+            
+            const progress = ((currentIndex + 1) / 100) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            // 답안 숨기기
+            document.getElementById('answerSection').style.display = 'none';
+            showingAnswer = false;
+        }
+
+        function handleCardClick() {
+            if (!showingAnswer) {
+                showAnswer();
+            } else {
+                nextQuestion();
+            }
+        }
+
+        function showAnswer() {
+            document.getElementById('answerSection').style.display = 'block';
+            showingAnswer = true;
+        }
+
+        function nextQuestion() {
+            if (currentIndex < verbs.length - 1) {
+                currentIndex++;
+                updateUI();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateUI();
+            }
+        }
+
+        function showCompletion() {
+            const studyTime = Math.round((Date.now() - startTime) / (1000 * 60));
+            document.getElementById('studyTime').textContent = `${studyTime}분`;
+            document.getElementById('learningScreen').style.display = 'none';
+            document.getElementById('completionScreen').style.display = 'block';
+        }
+
+        function restartLearning() {
+            currentIndex = 0;
+            startTime = Date.now();
+            document.getElementById('learningScreen').style.display = 'block';
+            document.getElementById('completionScreen').style.display = 'none';
+            updateUI();
+        }
+
+        // 키보드 이벤트 처리
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' || event.code === 'Enter') {
+                event.preventDefault();
+                if (!showingAnswer) {
+                    showAnswer();
+                } else {
+                    nextQuestion();
+                }
+            } else if (event.code === 'ArrowLeft') {
+                previousQuestion();
+            } else if (event.code === 'ArrowRight') {
+                if (showingAnswer) {
+                    nextQuestion();
+                }
+            }
+        });
+
+        // 초기화
+        initTheme();
+        updateUI();
+    </script>
+</body>
+</html>
